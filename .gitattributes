@@ -1,0 +1,2 @@
+*.go linguist-language=go
+*.lua linguist-language=go
