@@ -1,2 +1,5 @@
-*.go linguist-language=go
-*.lua linguist-language=go
+*.go linguist-language=Go
+*.lua linguist-language=Go
+*.js linguist-language=Go
+*.css linguist-language=Go
+*.html linguist-language=Go
