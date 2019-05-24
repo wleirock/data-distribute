@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"data-distribute/controllers"
+	"wleirock/data-distribute/controllers"
 
 	"github.com/astaxie/beego"
 )

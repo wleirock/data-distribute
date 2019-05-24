@@ -3,8 +3,8 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"fmt"
-	"data-distribute/mylualib"
 	"github.com/yuin/gopher-lua"
+	"wleirock/data-distribute/mylualib"
 )
 
 // ReportInfoController reportInfo api
