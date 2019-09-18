@@ -16,9 +16,7 @@ type MainController struct {
 	beego.Controller
 }
 
-//Get 首页
+//Get 登录界面
 func (c *MainController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
-	c.TplName = "index.tpl"
+	c.TplName = "login.html"
 }
