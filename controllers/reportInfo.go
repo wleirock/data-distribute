@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
 	"fmt"
 	"github.com/yuin/gopher-lua"
 	"wleirock/data-distribute/mylualib"
@@ -9,7 +8,7 @@ import (
 
 // ReportInfoController reportInfo api
 type ReportInfoController struct {
-	beego.Controller
+	BaseController
 }
 // Distribute send reportInfo to other platform
 func (c *ReportInfoController) Distribute() {

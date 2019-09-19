@@ -3,13 +3,11 @@ package controllers
 import (
 	"wleirock/data-distribute/models"
 	"wleirock/data-distribute/service"
-
-	"github.com/astaxie/beego"
 )
 
 // ScriptController 脚本管理
 type ScriptController struct {
-	beego.Controller
+	BaseController
 }
 
 type queryData struct {
@@ -25,17 +23,14 @@ func (c *ScriptController) Index() {
 
 // List 列表数据
 func (c *ScriptController) List() {
-	pageIndex, err := c.GetInt("page")
+	scriptInfo := models.ScriptInfo{}
+	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		pageIndex = 1
-	}
-	pageSize, err := c.GetInt("limit")
-	if err != nil {
-		pageSize = 10
+		c.ErrorListMsg()
 	}
 
-	list := service.GetScriptInfoList(pageIndex, pageSize)
-	count := service.GetScriptInfoTotal()
+	list := service.GetScriptInfoList(&scriptInfo)
+	count := service.GetScriptInfoTotal(&scriptInfo)
 	result := queryData{0, count, list}
 	c.Data["json"] = &result
 	c.ServeJSON()

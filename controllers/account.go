@@ -1,12 +1,8 @@
 package controllers
 
-import (
-	"github.com/astaxie/beego"
-)
-
 // AccountController 账户
 type AccountController struct {
-	beego.Controller
+	BaseController
 }
 
 // Login 登录

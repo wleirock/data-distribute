@@ -17,7 +17,19 @@
       <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
         <legend>脚本列表</legend>
       </fieldset>
-
+      <!-- 搜索框区域 -->
+      <div class="table_query" style="margin-left: 10px;">
+        机构名称: 
+        <div class="layui-inline">
+            <input class="layui-input" name="hospitalName" id="hospitalName" autocomplete="off">
+        </div>&nbsp;&nbsp;
+        脚本名称: 
+        <div class="layui-inline">
+            <input class="layui-input" name="scriptlName" id="scriptlName" autocomplete="off">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+      </div>
+      <!-- table区域 -->
       <table class="layui-hide" id="t_script" lay-filter="t_script"></table>
       <script type="text/html" id="barArea">
         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
@@ -34,6 +46,8 @@
         , form = layui.form;
 
       table.render({
+        id : 'scriptTable',
+        method: 'post',
         elem: '#t_script',
         url: '/web/script/list',
         cellMinWidth: 80, //全局定义常规单元格的最小宽度
@@ -47,11 +61,33 @@
           , { field: 'dataType', title: '数据类型' }
           , { field: 'description', title: '脚本描述' }
           , { field: 'scriptName', title: '脚本名称' }
+          , { field: 'apiIp', title: 'IP' }
+          , { field: 'apiPort', title: '端口' }
           , { field: 'status', title: '状态' }
           , { field: 'operate', title: '操作', toolbar: '#barArea' }
         ]]
       });
-      
+
+      var $ = layui.$, active = {
+        reload: function () {
+          //执行重载
+          table.reload('scriptTable', {
+            page: {
+              curr: 1 //重新从第 1 页开始
+            }
+            , where: {
+              hospitalName: $('#hospitalName').val(),
+              scriptName: $('#scriptlName').val()
+            }
+          }, 'data');
+        }
+      };
+
+      $('.table_query .layui-btn').on('click', function () {
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+      });
+
       table.on('tool(t_script)', function (obj) {
         var data = obj.data;
         console.log(obj)
