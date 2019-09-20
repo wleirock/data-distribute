@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>脚本信息</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+</head>
+
+<body>
+    <form class="layui-form" action="" lay-filter="fm">
+        <input type="hidden" name="infoPk" value="{{.scriptInfo.InfoPk}}">
+        <input type="hidden" name="hospitalName" id="hospitalName">
+        <input type="hidden" name="status" value="{{.scriptInfo.Status}}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择机构</label>
+            <div class="layui-input-block">
+                <select name="hospitalFk" id="hospitalFk" lay-verify="required" lay-filter="fm_hospital">
+                    <option value="">--请选择--</option>
+                    <option value="1001">天字第一号</option>
+                    <option value="1002">天字第二号</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据类型</label>
+            <div class="layui-input-block">
+                <select name="dataType" lay-verify="required">
+                    <option value="">--请选择--</option>
+                    <option value="REPORT" {{if eq .scriptInfo.DataType `REPORT`}}selected{{end}}>检查报告</option>
+                    <option value="CHECK" {{if eq .scriptInfo.DataType `CHECK`}}selected{{end}}>检查信息</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">脚本名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="scriptName" lay-verify="required|scriptName" autocomplete="off"
+                    class="layui-input" value="{{.scriptInfo.ScriptName}}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">脚本描述</label>
+            <div class="layui-input-block">
+                <input type="text" name="description" lay-verify="required" autocomplete="off" class="layui-input" value="{{.scriptInfo.Description}}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">IP</label>
+            <div class="layui-input-block">
+                <input type="text" name="apiIp" lay-verify="required|ip" autocomplete="off" class="layui-input" value="{{.scriptInfo.ApiIp}}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">PORT</label>
+            <div class="layui-input-block">
+                <input type="text" name="apiPort" lay-verify="required|number" autocomplete="off" class="layui-input" value="{{.scriptInfo.ApiPort}}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="btn_submit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="/static/layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'jquery', 'layer'], function () {
+            var form = layui.form;
+            var layer = layui.layer;
+            var $ = layui.$;
+            form.verify({
+                scriptName: [
+                    /\w{2,20}.lua$/
+                    , "脚本名称不能含特殊字符且只能以.lua结尾"
+                ],
+                ip: [
+                    /(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d).(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d).(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d).(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)/
+                    , "ip格式不正确"
+                ]
+            });
+
+            form.on('select(fm_hospital)', function (data) {
+                var hospitalName = data.elem[data.elem.selectedIndex].text
+                $("#hospitalName").val(hospitalName);
+            });
+
+            form.on('submit(btn_submit)', function (data) {
+                //var hospitalName = $("#hospitalFk").find("option:selected").text();
+                $.ajax({
+                    url: '/web/script/save',
+                    async: false,
+                    type: "POST",
+                    data: data.field,
+                    success: function (result) {
+                        var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                        parent.layer.close(index);
+                        parent.layer.msg(result.msg);
+                        window.parent.location.reload();
+                    }
+                });
+                return false;//禁止跳转，否则会提交两次，且页面会刷新
+            });
+        });
+    </script>
+</body>
+
+</html>

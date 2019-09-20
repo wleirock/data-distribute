@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"wleirock/data-distribute/models"
 	"wleirock/data-distribute/service"
 )
@@ -26,7 +27,7 @@ func (c *ScriptController) List() {
 	scriptInfo := models.ScriptInfo{}
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		c.ErrorListMsg()
+		c.ErrorMsg("查询失败")
 	}
 
 	list := service.GetScriptInfoList(&scriptInfo)
@@ -34,4 +35,39 @@ func (c *ScriptController) List() {
 	result := queryData{0, count, list}
 	c.Data["json"] = &result
 	c.ServeJSON()
+}
+
+// Add 新增或修改页面
+func (c *ScriptController) Add() {
+	infoPk, err := c.GetInt("infoPk")
+	if err != nil {
+		fmt.Println(err)
+	}
+	scriptInfo := service.GetScriptInByPk(infoPk)
+	c.Data["scriptInfo"] = scriptInfo
+	c.TplName = "script_add.html"
+}
+
+// Save 保存或更新
+func (c *ScriptController) Save() {
+	res := true
+	scriptInfo := models.ScriptInfo{}
+	err := c.ParseForm(&scriptInfo)
+	if err != nil {
+		c.ErrorMsg("保存失败")
+	}
+
+	if scriptInfo.InfoPk == 0 {
+		// 新增
+		scriptInfo.Status = "A"
+		res = service.SaveScriptInfo(&scriptInfo)
+	} else {
+		res = service.UpdateScriptInfo(&scriptInfo)
+	}
+
+	if res {
+		c.SuccessMsg("保存成功")
+	} else {
+		c.ErrorMsg("保存失败")
+	}
 }

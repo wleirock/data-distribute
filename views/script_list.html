@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>控制台</title>
+  <title>脚本信息</title>
   <link rel="stylesheet" href="/static/layui/css/layui.css">
 </head>
 
@@ -19,15 +19,16 @@
       </fieldset>
       <!-- 搜索框区域 -->
       <div class="table_query" style="margin-left: 10px;">
-        机构名称: 
+        机构名称:
         <div class="layui-inline">
-            <input class="layui-input" name="hospitalName" id="hospitalName" autocomplete="off">
+          <input class="layui-input" name="hospitalName" id="hospitalName" autocomplete="off">
         </div>&nbsp;&nbsp;
-        脚本名称: 
+        脚本名称:
         <div class="layui-inline">
-            <input class="layui-input" name="scriptlName" id="scriptlName" autocomplete="off">
+          <input class="layui-input" name="scriptlName" id="scriptlName" autocomplete="off">
         </div>
         <button class="layui-btn" data-type="reload">搜索</button>
+        <button class="layui-btn layui-btn-warm" onclick="openAdd()">新增</button>
       </div>
       <!-- table区域 -->
       <table class="layui-hide" id="t_script" lay-filter="t_script"></table>
@@ -46,7 +47,7 @@
         , form = layui.form;
 
       table.render({
-        id : 'scriptTable',
+        id: 'scriptTable',
         method: 'post',
         elem: '#t_script',
         url: '/web/script/list',
@@ -90,17 +91,25 @@
 
       table.on('tool(t_script)', function (obj) {
         var data = obj.data;
-        console.log(obj)
         if (obj.event === 'del') {
           layer.confirm('真的删除行么', function (index) {
             obj.del();
             layer.close(index);
           });
         } else if (obj.event === 'edit') {
-          layer.msg("修改成功")
+          openAdd(data.infoPk)
         }
       });
     });
+
+    function openAdd(infoPk) {
+      layer.open({
+        type: 2,
+        title: "编辑脚本信息",
+        area: ['500px', '420px'],
+        content: "/web/script/add?infoPk=" + infoPk
+      });
+    }
   </script>
 </body>
 

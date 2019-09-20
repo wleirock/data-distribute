@@ -15,6 +15,8 @@ func init() {
 	// 脚本管理
 	beego.Router("/web/script/index", &controllers.ScriptController{}, "get:Index")
 	beego.Router("/web/script/list", &controllers.ScriptController{}, "post:List")
+	beego.Router("/web/script/add", &controllers.ScriptController{}, "get:Add")
+	beego.Router("/web/script/save", &controllers.ScriptController{}, "post:Save")
 
 	// API
 	beego.Router("/api/repportInfo/distribute", &controllers.ReportInfoController{}, "*:Distribute")
