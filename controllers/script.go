@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"wleirock/data-distribute/models"
 	"wleirock/data-distribute/service"
+	"wleirock/data-distribute/utils"
 )
 
 // ScriptController 脚本管理
@@ -55,13 +56,25 @@ func (c *ScriptController) Save() {
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
 		c.ErrorMsg("保存失败")
+		return
+	}
+
+	// 校验脚本文件是否存在(只有自定义的脚本校验，公共方法不校验)
+	if scriptInfo.Status == "U" {
+		if !utils.LuaFileExist(scriptInfo.ScriptName) {
+			c.ErrorMsg("脚本文件不存在")
+			return
+		}
 	}
 
 	if scriptInfo.InfoPk == 0 {
 		// 新增
-		scriptInfo.Status = "A"
+		if scriptInfo.Status == "" {
+			scriptInfo.Status = "U"
+		}
 		res = service.SaveScriptInfo(&scriptInfo)
 	} else {
+		// 修改
 		res = service.UpdateScriptInfo(&scriptInfo)
 	}
 
@@ -70,4 +83,39 @@ func (c *ScriptController) Save() {
 	} else {
 		c.ErrorMsg("保存失败")
 	}
+}
+
+// Delete 删除
+func (c *ScriptController) Delete() {
+	infoPk, err := c.GetInt("infoPk")
+	if err != nil {
+		c.ErrorMsg("获取参数失败")
+	}
+
+	res := service.DeleteScriptInfo(infoPk)
+
+	if res {
+		c.SuccessMsg("删除成功")
+	} else {
+		c.ErrorMsg("删除失败")
+	}
+}
+
+// GetHospitalList 获取hospital列表
+func (c *ScriptController) GetHospitalList() {
+	hosList := service.GetHospitalInfoList()
+	c.Data["json"] = &hosList
+	c.ServeJSON()
+}
+
+// GetMethodList 获取公共方法列表
+func (c *ScriptController) GetMethodList() {
+	methodList := service.GetAllPublicMethodList()
+	c.Data["json"] = &methodList
+	c.ServeJSON()
+}
+
+// File 脚本文件
+func (c *ScriptController) File() {
+	c.TplName = "script_file.html"
 }

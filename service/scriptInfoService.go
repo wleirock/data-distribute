@@ -87,15 +87,12 @@ func UpdateScriptInfo(scriptInfo *models.ScriptInfo) bool {
 		fmt.Println("UpdateScriptInfo error", err)
 		return false
 	}
-	count, err := res.RowsAffected()
+	_, err = res.RowsAffected()
 	if err != nil {
 		fmt.Println("UpdateScriptInfo error", err)
 		return false
 	}
-	if count > 0 {
-		return true
-	}
-	return false
+	return true
 }
 
 // GetScriptInByPk 根据主键查询
@@ -107,4 +104,18 @@ func GetScriptInByPk(infoPk int) models.ScriptInfo {
 		fmt.Println("GetScriptInByPk error", err)
 	}
 	return scriptInfo
+}
+
+// DeleteScriptInfo 根据主键删除脚本信息
+func DeleteScriptInfo(infoPk int) bool {
+	o := orm.NewOrm()
+	res, err := o.Raw("delete from script_info where info_pk = ?", infoPk).Exec()
+	if err != nil {
+		return false
+	}
+	count, _ := res.RowsAffected()
+	if count > 0 {
+		return true
+	}
+	return false
 }

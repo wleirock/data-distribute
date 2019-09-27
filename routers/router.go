@@ -17,6 +17,10 @@ func init() {
 	beego.Router("/web/script/list", &controllers.ScriptController{}, "post:List")
 	beego.Router("/web/script/add", &controllers.ScriptController{}, "get:Add")
 	beego.Router("/web/script/save", &controllers.ScriptController{}, "post:Save")
+	beego.Router("/web/script/delete", &controllers.ScriptController{}, "post:Delete")
+	beego.Router("/web/script/hospitalList", &controllers.ScriptController{}, "get:GetHospitalList")
+	beego.Router("/web/script/methodlList", &controllers.ScriptController{}, "get:GetMethodList")
+	beego.Router("/web/script/file", &controllers.ScriptController{}, "get:File")
 
 	// API
 	beego.Router("/api/repportInfo/distribute", &controllers.ReportInfoController{}, "*:Distribute")

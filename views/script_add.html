@@ -10,52 +10,61 @@
 
 <body>
     <form class="layui-form" action="" lay-filter="fm">
-        <input type="hidden" name="infoPk" value="{{.scriptInfo.InfoPk}}">
-        <input type="hidden" name="hospitalName" id="hospitalName">
-        <input type="hidden" name="status" value="{{.scriptInfo.Status}}">
+        <input type="hidden" name="infoPk" value="{%.scriptInfo.InfoPk%}">
+        <input type="hidden" name="hospitalName" id="hospitalName" value="{%.scriptInfo.HospitalName%}">
+        <input type="hidden" name="status" id="status" value="{%.scriptInfo.Status%}">
         <div class="layui-form-item">
             <label class="layui-form-label">选择机构</label>
             <div class="layui-input-block">
                 <select name="hospitalFk" id="hospitalFk" lay-verify="required" lay-filter="fm_hospital">
                     <option value="">--请选择--</option>
-                    <option value="1001">天字第一号</option>
-                    <option value="1002">天字第二号</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">公共方法</label>
+            <div class="layui-input-block">
+                <select id="publicMethod" lay-filter="fm_public">
+                    <option value="">--若是自定义则不选择该项--</option>
                 </select>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">数据类型</label>
             <div class="layui-input-block">
-                <select name="dataType" lay-verify="required">
+                <select name="dataType" lay-verify="required" id="dataType" value="{%.scriptInfo.DataType%}">
                     <option value="">--请选择--</option>
-                    <option value="REPORT" {{if eq .scriptInfo.DataType `REPORT`}}selected{{end}}>检查报告</option>
-                    <option value="CHECK" {{if eq .scriptInfo.DataType `CHECK`}}selected{{end}}>检查信息</option>
+                    <option value="REPORT" {%if eq .scriptInfo.DataType `REPORT`%}selected{%end%}>检查报告</option>
+                    <option value="CHECK" {%if eq .scriptInfo.DataType `CHECK`%}selected{%end%}>检查信息</option>
                 </select>
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">脚本名称</label>
             <div class="layui-input-block">
-                <input type="text" name="scriptName" lay-verify="required|scriptName" autocomplete="off"
-                    class="layui-input" value="{{.scriptInfo.ScriptName}}">
+                <input type="text" name="scriptName" id="scriptName" lay-verify="required|scriptName" autocomplete="off"
+                    class="layui-input" value="{%.scriptInfo.ScriptName%}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">脚本描述</label>
             <div class="layui-input-block">
-                <input type="text" name="description" lay-verify="required" autocomplete="off" class="layui-input" value="{{.scriptInfo.Description}}">
+                <input type="text" name="description" id="description" lay-verify="required" autocomplete="off"
+                    class="layui-input" value="{%.scriptInfo.Description%}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">IP</label>
             <div class="layui-input-block">
-                <input type="text" name="apiIp" lay-verify="required|ip" autocomplete="off" class="layui-input" value="{{.scriptInfo.ApiIp}}">
+                <input type="text" name="apiIp" lay-verify="required|ip" autocomplete="off" class="layui-input"
+                    value="{%.scriptInfo.ApiIp%}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">PORT</label>
             <div class="layui-input-block">
-                <input type="text" name="apiPort" lay-verify="required|number" autocomplete="off" class="layui-input" value="{{.scriptInfo.ApiPort}}">
+                <input type="text" name="apiPort" lay-verify="required|number" autocomplete="off" class="layui-input"
+                    value="{%.scriptInfo.ApiPort%}">
             </div>
         </div>
         <div class="layui-form-item">
@@ -71,9 +80,47 @@
             var form = layui.form;
             var layer = layui.layer;
             var $ = layui.$;
+            var status = $("#status").val();
+            if(status == "P"){
+                changeScriptInfoStyle("hide");
+            }
+            //加载hospital的select内容
+            $.ajax({
+                url: '/web/script/hospitalList',
+                type: "GET",
+                async: false,
+                success: function (result) {
+                    if (result) {
+                        for (i = 0; i < result.length; i++) {
+                            var option = "<option value='" + result[i].hospitalPk + "'";
+                            if (result[i].hospitalPk == "{%.scriptInfo.HospitalFk%}") {
+                                option += "selected";
+                            }
+                            option = option + ">" + result[i].hospitalName + "</option>";
+                            $("#hospitalFk").append(option);
+                        }
+                    }
+                }
+            });
+            //加载公共方法下拉框
+            $.ajax({
+                url: '/web/script/methodlList',
+                type: "GET",
+                async: false,
+                success: function (result) {
+                    if (result) {
+                        // JSON.stringify(result[i])
+                        for (i = 0; i < result.length; i++) {
+                            var option = "<option value='" + result[i].dataType + "&" + result[i].scriptName + "'>" + result[i].methodName + "</option>";
+                            $("#publicMethod").append(option);
+                        }
+                    }
+                }
+            });
+            form.render('select');
             form.verify({
                 scriptName: [
-                    /\w{2,20}.lua$/
+                    /[a-zA-Z0-9_]{2,20}.lua$/
                     , "脚本名称不能含特殊字符且只能以.lua结尾"
                 ],
                 ip: [
@@ -87,6 +134,26 @@
                 $("#hospitalName").val(hospitalName);
             });
 
+            form.on('select(fm_public)', function (data) {
+                if (data.value) {
+                    $("#status").val("P");
+                    var methodName = data.elem[data.elem.selectedIndex].text;
+                    var methodType = data.value.split("&")[0];
+                    var scriptName = data.value.split("&")[1];
+                    $("#dataType").val(methodType);
+                    $("#scriptName").val(scriptName);
+                    $("#description").val(methodName);
+                    changeScriptInfoStyle("show");
+                } else {
+                    $("#status").val("U");
+                    $("#dataType").val("");
+                    $("#scriptName").val("");
+                    $("#description").val("");
+                    changeScriptInfoStyle("hide");
+                }
+                form.render('select');
+            });
+
             form.on('submit(btn_submit)', function (data) {
                 //var hospitalName = $("#hospitalFk").find("option:selected").text();
                 $.ajax({
@@ -95,14 +162,34 @@
                     type: "POST",
                     data: data.field,
                     success: function (result) {
-                        var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
-                        parent.layer.close(index);
-                        parent.layer.msg(result.msg);
-                        window.parent.location.reload();
+                        if (result.code == 0) {
+                            var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                            parent.layer.close(index);
+                            parent.layer.msg(result.msg);
+                            window.parent.location.reload();
+                        } else {
+                            layer.msg(result.msg)
+                        }
                     }
                 });
                 return false;//禁止跳转，否则会提交两次，且页面会刷新
             });
+
+            function changeScriptInfoStyle(type) {
+            if (type == "hiden") {
+                $("#dataType").removeAttr("disabled");
+                $("#scriptName").removeClass("layui-disabled");
+                $("#scriptName").attr("readonly", false);
+                $("#description").removeClass("layui-disabled");
+                $("#description").attr("readonly", false);
+            } else {
+                $("#dataType").attr("disabled", "disabled");
+                $("#scriptName").addClass("layui-disabled");
+                $("#scriptName").attr("readonly", true);
+                $("#description").addClass("layui-disabled");
+                $("#description").attr("readonly", true);
+            }
+        }
         });
     </script>
 </body>
