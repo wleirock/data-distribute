@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/astaxie/beego"
 )
 
@@ -28,7 +30,10 @@ func (c *BaseController) Get() {
 }
 
 // ErrorMsg ajax请求数据发生错误时返回数据
-func (c *BaseController) ErrorMsg(content string) {
+func (c *BaseController) ErrorMsg(content string, err error) {
+	if err != nil {
+		fmt.Println(content, " : ", err)
+	}
 	msg := AjaxMsg{-1, content}
 	c.Data["json"] = &msg
 	c.ServeJSON()

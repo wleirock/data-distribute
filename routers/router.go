@@ -12,7 +12,7 @@ func init() {
 	beego.Router("/account/login", &controllers.AccountController{}, "post:Login")
 	beego.Router("/account/logout", &controllers.AccountController{}, "get:Logout")
 
-	// 脚本管理
+	// 机构脚本管理
 	beego.Router("/web/script/index", &controllers.ScriptController{}, "get:Index")
 	beego.Router("/web/script/list", &controllers.ScriptController{}, "post:List")
 	beego.Router("/web/script/add", &controllers.ScriptController{}, "get:Add")
@@ -20,7 +20,12 @@ func init() {
 	beego.Router("/web/script/delete", &controllers.ScriptController{}, "post:Delete")
 	beego.Router("/web/script/hospitalList", &controllers.ScriptController{}, "get:GetHospitalList")
 	beego.Router("/web/script/methodlList", &controllers.ScriptController{}, "get:GetMethodList")
-	beego.Router("/web/script/file", &controllers.ScriptController{}, "get:File")
+
+	//脚本文件
+	beego.Router("/web/script/file/index", &controllers.ScriptFileController{}, "get:Index")
+	beego.Router("/web/script/file/list", &controllers.ScriptFileController{}, "post:List")
+	beego.Router("/web/script/file/upload", &controllers.ScriptFileController{}, "post:Upload")
+	beego.Router("/web/script/file/delete", &controllers.ScriptFileController{}, "post:Delete")
 
 	// API
 	beego.Router("/api/repportInfo/distribute", &controllers.ReportInfoController{}, "*:Distribute")

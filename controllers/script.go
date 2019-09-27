@@ -28,7 +28,7 @@ func (c *ScriptController) List() {
 	scriptInfo := models.ScriptInfo{}
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		c.ErrorMsg("查询失败")
+		c.ErrorMsg("脚本列表查询失败", err)
 	}
 
 	list := service.GetScriptInfoList(&scriptInfo)
@@ -55,14 +55,14 @@ func (c *ScriptController) Save() {
 	scriptInfo := models.ScriptInfo{}
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		c.ErrorMsg("保存失败")
+		c.ErrorMsg("脚本设置保存失败", err)
 		return
 	}
 
 	// 校验脚本文件是否存在(只有自定义的脚本校验，公共方法不校验)
 	if scriptInfo.Status == "U" {
 		if !utils.LuaFileExist(scriptInfo.ScriptName) {
-			c.ErrorMsg("脚本文件不存在")
+			c.ErrorMsg("脚本文件不存在", nil)
 			return
 		}
 	}
@@ -81,7 +81,7 @@ func (c *ScriptController) Save() {
 	if res {
 		c.SuccessMsg("保存成功")
 	} else {
-		c.ErrorMsg("保存失败")
+		c.ErrorMsg("脚本设置保存失败", nil)
 	}
 }
 
@@ -89,7 +89,7 @@ func (c *ScriptController) Save() {
 func (c *ScriptController) Delete() {
 	infoPk, err := c.GetInt("infoPk")
 	if err != nil {
-		c.ErrorMsg("获取参数失败")
+		c.ErrorMsg("删除脚本设置，获取参数失败", err)
 	}
 
 	res := service.DeleteScriptInfo(infoPk)
@@ -97,7 +97,7 @@ func (c *ScriptController) Delete() {
 	if res {
 		c.SuccessMsg("删除成功")
 	} else {
-		c.ErrorMsg("删除失败")
+		c.ErrorMsg("删除失败", nil)
 	}
 }
 
@@ -113,9 +113,4 @@ func (c *ScriptController) GetMethodList() {
 	methodList := service.GetAllPublicMethodList()
 	c.Data["json"] = &methodList
 	c.ServeJSON()
-}
-
-// File 脚本文件
-func (c *ScriptController) File() {
-	c.TplName = "script_file.html"
 }
