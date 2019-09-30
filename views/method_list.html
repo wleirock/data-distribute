@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>公共方法</title>
+  <link rel="stylesheet" href="/static/layui/css/layui.css">
+</head>
+
+<body class="layui-layout-body" onload="changeSideStyle()">
+  <input type="hidden" id="identity" value="公共方法">
+  <div class="layui-layout layui-layout-admin">
+    {%template "common/header.html" .%}
+    {%template "common/sider.html" .%}
+    <div class="layui-body">
+      <!-- 内容主体区域 -->
+      <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+        <legend>公共方法</legend>
+      </fieldset>
+      <div class="table_query" style="margin-left: 10px;">
+          <button class="layui-btn layui-btn-warm" onclick="openAdd()">新增</button>
+        </div>
+      <!-- table区域 -->
+      <table class="layui-hide" id="t_method" lay-filter="t_method"></table>
+      <script type="text/html" id="barArea">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+      </script>
+
+    </div>
+    {%template "common/footer.html" .%}
+  </div>
+  <script src="/static/layui/layui.js"></script>
+  <script>
+    layui.use(['table', 'element'], function () {
+      var table = layui.table
+        , form = layui.form
+        , element = layui.element
+        , $ = layui.$;
+
+      table.render({
+        id: 'methodTable',
+        elem: '#t_method',
+        url: '/web/method/list',
+        method: 'post',
+        cellMinWidth: 80,
+        cols: [[ //标题栏
+          { field: 'methodName', title: '方法名称' }
+          , { field: 'dataType', title: '数据类型' }
+          , { field: 'scriptName', title: '脚本名称' }
+          , { field: 'operate', title: '操作', minWidth: "300", toolbar: '#barArea' }
+        ]]
+      });
+
+      $('.table_query .layui-btn').on('click', function () {
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+      });
+
+      table.on('tool(t_method)', function (obj) {
+        var data = obj.data;
+        if (obj.event === 'del') {
+          layer.confirm('确定要删除吗？', function (index) {
+            $.ajax({
+              url: "/web/method/delete",
+              async: false,
+              type: "POST",
+              data: { "methodPk": data.methodPk, "scriptName": data.scriptName },
+              success: function (result) {
+                if (result.code == '0') {
+                  layer.msg("删除成功");
+                  obj.del();
+                  layer.close(index);
+                } else {
+                  layer.msg(result.msg);
+                }
+              }
+            });
+          });
+        } else if (obj.event === 'edit') {
+          openAdd(data.methodPk)
+        }
+      });
+    });
+
+    function openAdd(methodPk) {
+      layer.open({
+        type: 2,
+        title: "编辑信息",
+        area: ['500px', '300px'],
+        content: "/web/method/add?methodPk=" + methodPk
+      });
+    }
+  </script>
+</body>
+
+</html>

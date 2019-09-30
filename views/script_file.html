@@ -4,46 +4,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>机构脚本</title>
+  <title>脚本管理</title>
   <link rel="stylesheet" href="/static/layui/css/layui.css">
 </head>
 
-<body class="layui-layout-body">
-    <div class="layui-layout layui-layout-admin">
-        {%template "common/header.html" .%}
-        {%template "common/sider.html" .%}
-        <div class="layui-body">
-          <!-- 内容主体区域 -->
-          <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
-            <legend>文件列表</legend>
-          </fieldset>
-          <!-- 搜索框区域 -->
-          <div class="table_query" style="margin-left: 10px;">
-            文件名称:
-            <div class="layui-inline">
-              <input class="layui-input" name="fileName" id="fileName" autocomplete="off">
-            </div>
-            <button class="layui-btn" data-type="reload">搜索</button>
-            <button class="layui-btn layui-btn-warm" id="btn_upload"><i class="layui-icon"></i>上传文件</button>
+<body class="layui-layout-body" onload="changeSideStyle()">
+  <input type="hidden" id="identity" value="脚本管理">
+  <div class="layui-layout layui-layout-admin">
+    {%template "common/header.html" .%}
+    {%template "common/sider.html" .%}
+    <div class="layui-body">
+      <!-- 内容主体区域 -->
+      <div style="padding: 15px;">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+          <legend>文件列表</legend>
+        </fieldset>
+        <div class="table_query" style="margin-left: 10px;">
+          文件名称:
+          <div class="layui-inline">
+            <input class="layui-input" name="fileName" id="fileName" autocomplete="off">
           </div>
-          <!-- table区域 -->
-          <table class="layui-hide" id="t_script" lay-filter="t_script"></table>
-          <script type="text/html" id="barArea">
-            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
-            <a class="layui-btn layui-btn-checked layui-btn-xs" lay-event="download">下载</a>
-          </script>
-    
+          <button class="layui-btn" data-type="reload">搜索</button>
+          <button class="layui-btn layui-btn-warm" id="btn_upload"><i class="layui-icon"></i>上传文件</button>
         </div>
-        {%template "common/footer.html" .%}
+        <!-- table区域 -->
+        <table class="layui-hide" id="t_script" lay-filter="t_script"></table>
+        <script type="text/html" id="barArea">
+        {{# if(d.status=="U"){ }}
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        <a class="layui-btn layui-btn-checked layui-btn-xs" lay-event="download">下载</a>
+        {{# } }}
+      </script>
       </div>
+    </div>
+  </div>
 
-  <script type="text/javascript" src="/static/layui/layui.js"></script>
+  {%template "common/footer.html" .%}
+  </div>
+  <script src="/static/layui/layui.js"></script>
   <script>
-    layui.use(['upload', 'layer', 'table'], function () {
+    layui.use(['upload', 'layer', 'table', 'element'], function () {
       var $ = layui.jquery
         , upload = layui.upload
         , layer = layui.layer
-        , table = layui.table;
+        , table = layui.table
+        , element = layui.element;
 
       table.render({
         id: 'scriptFileTable',
@@ -58,7 +63,7 @@
         },
         cols: [[
           { field: 'fileName', title: '文件名称', sort: true }
-          , { field: 'fileSize', title: '文件大小' }
+          , { field: 'fileSize', title: '文件大小', templet: function (d) { return parseInt(d.fileSize / 1024) + "KB" } }
           , { field: 'uploadTime', title: '上传时间' }
           , { field: 'operate', title: '操作', toolbar: '#barArea' }
         ]]
@@ -91,29 +96,38 @@
               url: "/web/script/file/delete",
               async: false,
               type: "POST",
-              data: { "filePk": data.filePk },
+              data: { "filePk": data.filePk, "fileName": data.fileName },
               success: function (result) {
                 if (result.code == '0') {
                   layer.msg("删除成功");
                   obj.del();
                   layer.close(index);
                 } else {
-                  layer.msg("删除失败");
+                  layer.msg(result.msg);
                 }
               }
             });
           });
         } else if (obj.event === 'download') {
-          //
+          window.location.href = "/web/script/file/download?fileName=" + data.fileName;
         }
       });
 
       upload.render({
         elem: '#btn_upload'
-        , url: '/web/script/upload'
-        , accept: 'file' //普通文件
+        , url: '/web/script/file/upload'
+        , accept: 'file'
+        , before: function (obj) {
+          layer.load();
+        }
         , done: function (res) {
-          layer.msg(res.msg);
+          layer.closeAll('loading');
+          if (res.code == '0') {
+            layer.msg(res.msg);
+            window.location.reload();
+          } else {
+            layer.msg(res.msg);
+          }
         }
       });
     });

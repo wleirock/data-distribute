@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>公共方法</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+</head>
+
+<body>
+    <form class="layui-form" action="" lay-filter="fm">
+        <input type="hidden" name="methodPk" value="{%.method.MethodPk%}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据类型</label>
+            <div class="layui-input-block">
+                <select name="dataType" lay-verify="required" value="{%.method.DataType%}">
+                    <option value="">--请选择--</option>
+                    <option value="REPORT" {%if eq .method.DataType `REPORT`%}selected{%end%}>检查报告</option>
+                    <option value="CHECK" {%if eq .method.DataType `CHECK`%}selected{%end%}>检查信息</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">方法名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="methodName" lay-verify="required" autocomplete="off" class="layui-input"
+                    value="{%.method.MethodName%}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">脚本名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="scriptName" lay-verify="required|scriptName" autocomplete="off"
+                    class="layui-input" value="{%.method.ScriptName%}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="btn_submit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="/static/layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'layer', 'element'], function () {
+            var form = layui.form;
+            var layer = layui.layer;
+            var $ = layui.$;
+            var element = layui.element;
+            form.verify({
+                scriptName: [
+                    /[a-zA-Z0-9_]{2,20}.lua$/
+                    , "脚本名称不能含特殊字符且只能以.lua结尾"
+                ]
+            });
+
+            form.on('submit(btn_submit)', function (data) {
+                $.ajax({
+                    url: '/web/method/save',
+                    async: false,
+                    type: "POST",
+                    data: data.field,
+                    success: function (result) {
+                        if (result.code == 0) {
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            parent.layer.msg(result.msg);
+                            window.parent.location.reload();
+                        } else {
+                            layer.msg(result.msg)
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -76,9 +76,10 @@
     </form>
     <script type="text/javascript" src="/static/layui/layui.js"></script>
     <script>
-        layui.use(['form', 'jquery', 'layer'], function () {
+        layui.use(['form', 'layer', 'element'], function () {
             var form = layui.form;
             var layer = layui.layer;
+            var element = layui.element;
             var $ = layui.$;
             var status = $("#status").val();
             if(status == "P"){
@@ -143,13 +144,13 @@
                     $("#dataType").val(methodType);
                     $("#scriptName").val(scriptName);
                     $("#description").val(methodName);
-                    changeScriptInfoStyle("show");
+                    changeScriptInfoStyle("hide");
                 } else {
                     $("#status").val("U");
                     $("#dataType").val("");
                     $("#scriptName").val("");
                     $("#description").val("");
-                    changeScriptInfoStyle("hide");
+                    changeScriptInfoStyle("show");
                 }
                 form.render('select');
             });
@@ -176,13 +177,13 @@
             });
 
             function changeScriptInfoStyle(type) {
-            if (type == "hiden") {
+            if (type == "show") {
                 $("#dataType").removeAttr("disabled");
                 $("#scriptName").removeClass("layui-disabled");
                 $("#scriptName").attr("readonly", false);
                 $("#description").removeClass("layui-disabled");
                 $("#description").attr("readonly", false);
-            } else {
+            } else if(type == "hide"){
                 $("#dataType").attr("disabled", "disabled");
                 $("#scriptName").addClass("layui-disabled");
                 $("#scriptName").attr("readonly", true);

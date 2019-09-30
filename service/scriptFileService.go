@@ -52,17 +52,17 @@ func GetScriptFileTotal(scriptFile *models.ScriptFile) int {
 	return totalCount
 }
 
-// SaveScriptFile 保存脚本信息
-func SaveScriptFile(scriptFile *models.ScriptFile) bool {
+// AddScriptFile 保存脚本信息
+func AddScriptFile(scriptFile *models.ScriptFile) bool {
 	o := orm.NewOrm()
 	res, err := o.Raw("insert into script_file(file_name,file_size,status,upload_time) values (?,?,?,?)", scriptFile.FileName, scriptFile.FileSize, scriptFile.Status, scriptFile.UploadTime).Exec()
 	if err != nil {
-		fmt.Println("SaveScriptFile error", err)
+		fmt.Println("AddScriptFile error", err)
 		return false
 	}
 	count, err := res.RowsAffected()
 	if err != nil {
-		fmt.Println("SaveScriptFile error", err)
+		fmt.Println("AddScriptFile error", err)
 		return false
 	}
 	if count > 0 {
@@ -103,11 +103,24 @@ func DeleteScriptFile(filePk int) bool {
 	o := orm.NewOrm()
 	res, err := o.Raw("delete from script_file where file_pk = ?", filePk).Exec()
 	if err != nil {
+		fmt.Println("DeleteScriptFile error", err)
 		return false
 	}
-	count, _ := res.RowsAffected()
-	if count > 0 {
-		return true
+	_, err = res.RowsAffected()
+	if err != nil {
+		fmt.Println("DeleteScriptFile error", err)
+		return false
 	}
-	return false
+	return true
+}
+
+// GetScriptFileByName 根据文件名称查询
+func GetScriptFileByName(fileName string) models.ScriptFile {
+	var scriptFile models.ScriptFile
+	o := orm.NewOrm()
+	err := o.Raw("select file_pk,file_name,file_size,status,upload_time from script_file where file_name = ?", fileName).QueryRow(&scriptFile)
+	if err != nil {
+		fmt.Println("GetScriptFileByName error", err)
+	}
+	return scriptFile
 }

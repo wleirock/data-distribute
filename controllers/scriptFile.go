@@ -1,9 +1,11 @@
 package controllers
 
 import (
-	"fmt"
+	"strings"
+	"time"
 	"wleirock/data-distribute/models"
 	"wleirock/data-distribute/service"
+	"wleirock/data-distribute/utils"
 )
 
 // ScriptFileController 脚本文件
@@ -11,7 +13,7 @@ type ScriptFileController struct {
 	BaseController
 }
 
-type fileQueryDataFile struct {
+type fileQueryData struct {
 	Code  int                 `json:"code"`
 	Count int                 `json:"count"`
 	Data  []models.ScriptFile `json:"data"`
@@ -32,24 +34,42 @@ func (c *ScriptFileController) List() {
 
 	list := service.GetScriptFileList(&scriptFile)
 	count := service.GetScriptFileTotal(&scriptFile)
-	result := fileQueryDataFile{0, count, list}
+	result := fileQueryData{0, count, list}
 	c.Data["json"] = &result
 	c.ServeJSON()
 }
 
 // Delete 删除
 func (c *ScriptFileController) Delete() {
+	fileName := c.GetString("fileName")
+	if fileName == "" {
+		c.ErrorMsg("删除脚本文件:获取参数失败", nil)
+		return
+	}
+
+	ifExist, err := service.IfSciptInfoExist(fileName)
+	if err != nil {
+		c.ErrorMsg("删除脚本文件失败", err)
+		return
+	}
+	if ifExist {
+		c.ErrorMsg("该文件已被引用，不能删除", nil)
+		return
+	}
+
 	filePk, err := c.GetInt("filePk")
 	if err != nil {
-		c.ErrorMsg("删除脚本设置，获取参数失败", err)
+		c.ErrorMsg("删除脚本文件:获取参数失败", err)
+		return
 	}
 
 	res := service.DeleteScriptFile(filePk)
 
 	if res {
+		utils.DeleteLuaFile(fileName)
 		c.SuccessMsg("删除成功")
 	} else {
-		c.ErrorMsg("删除失败", nil)
+		c.ErrorMsg("删除脚本文件失败", nil)
 	}
 }
 
@@ -62,12 +82,50 @@ func (c *ScriptFileController) Upload() {
 	}
 	defer f.Close()
 
-	fmt.Println("上传的文件--", h.Filename)
+	nameAry := strings.Split(h.Filename, ".")
+	if len(nameAry) != 2 {
+		c.ErrorMsg("文件名称有误", err)
+		return
+	}
+	if nameAry[1] != "lua" {
+		c.ErrorMsg("文件名称有误", err)
+		return
+	}
 
 	err = c.SaveToFile("file", "luafile/"+h.Filename)
 	if err != nil {
 		c.ErrorMsg("脚本文件上传失败", err)
 		return
 	}
-	c.SuccessMsg("脚本文件上传成功")
+
+	scriptFile := models.ScriptFile{}
+	scriptFile.FileName = h.Filename
+	scriptFile.FileSize = h.Size
+	scriptFile.Status = "U"
+	scriptFile.UploadTime = time.Now().Format("2006-01-02 15:04:05")
+
+	res := true
+	existScriptFile := service.GetScriptFileByName(h.Filename)
+	if existScriptFile.FilePk != 0 {
+		scriptFile.FilePk = existScriptFile.FilePk
+		res = service.UpdateScriptFile(&scriptFile)
+	} else {
+		res = service.AddScriptFile(&scriptFile)
+	}
+
+	if res {
+		c.SuccessMsg("脚本文件上传成功")
+	} else {
+		c.ErrorMsg("脚本文件上传失败", nil)
+	}
+}
+
+// Download 下载脚本文件
+func (c *ScriptFileController) Download() {
+	fileName := c.GetString("fileName")
+	if fileName == "" {
+		c.ErrorMsg("Download 文件名称为空", nil)
+		return
+	}
+	c.Ctx.Output.Download("luafile/" + fileName)
 }

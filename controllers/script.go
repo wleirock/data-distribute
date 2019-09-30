@@ -7,7 +7,7 @@ import (
 	"wleirock/data-distribute/utils"
 )
 
-// ScriptController 脚本管理
+// ScriptController 分发设置
 type ScriptController struct {
 	BaseController
 }
@@ -28,7 +28,7 @@ func (c *ScriptController) List() {
 	scriptInfo := models.ScriptInfo{}
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		c.ErrorMsg("脚本列表查询失败", err)
+		c.ErrorMsg("分发设置查询失败", err)
 	}
 
 	list := service.GetScriptInfoList(&scriptInfo)
@@ -55,7 +55,7 @@ func (c *ScriptController) Save() {
 	scriptInfo := models.ScriptInfo{}
 	err := c.ParseForm(&scriptInfo)
 	if err != nil {
-		c.ErrorMsg("脚本设置保存失败", err)
+		c.ErrorMsg("分发设置保存失败", err)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (c *ScriptController) Save() {
 		if scriptInfo.Status == "" {
 			scriptInfo.Status = "U"
 		}
-		res = service.SaveScriptInfo(&scriptInfo)
+		res = service.AddScriptInfo(&scriptInfo)
 	} else {
 		// 修改
 		res = service.UpdateScriptInfo(&scriptInfo)
@@ -81,7 +81,7 @@ func (c *ScriptController) Save() {
 	if res {
 		c.SuccessMsg("保存成功")
 	} else {
-		c.ErrorMsg("脚本设置保存失败", nil)
+		c.ErrorMsg("分发设置保存失败", nil)
 	}
 }
 
@@ -89,7 +89,7 @@ func (c *ScriptController) Save() {
 func (c *ScriptController) Delete() {
 	infoPk, err := c.GetInt("infoPk")
 	if err != nil {
-		c.ErrorMsg("删除脚本设置，获取参数失败", err)
+		c.ErrorMsg("删除分发设置，获取参数失败", err)
 	}
 
 	res := service.DeleteScriptInfo(infoPk)

@@ -8,7 +8,7 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-// GetScriptInfoList 查询脚本信息集合
+// GetScriptInfoList 查询分发设置集合
 func GetScriptInfoList(scriptInfo *models.ScriptInfo) []models.ScriptInfo {
 	o := orm.NewOrm()
 
@@ -60,8 +60,8 @@ func GetScriptInfoTotal(scriptInfo *models.ScriptInfo) int {
 	return totalCount
 }
 
-// SaveScriptInfo 保存脚本信息
-func SaveScriptInfo(scriptInfo *models.ScriptInfo) bool {
+// AddScriptInfo 保存分发设置
+func AddScriptInfo(scriptInfo *models.ScriptInfo) bool {
 	o := orm.NewOrm()
 	res, err := o.Raw("insert into script_info(hospital_fk,hospital_name,data_type,script_name,description,api_ip,api_port,status) values (?,?,?,?,?,?,?,?)", scriptInfo.HospitalFk, scriptInfo.HospitalName, scriptInfo.DataType, scriptInfo.ScriptName, scriptInfo.Description, scriptInfo.ApiIp, scriptInfo.ApiPort, scriptInfo.Status).Exec()
 	if err != nil {
@@ -79,7 +79,7 @@ func SaveScriptInfo(scriptInfo *models.ScriptInfo) bool {
 	return false
 }
 
-// UpdateScriptInfo 更新脚本信息
+// UpdateScriptInfo 更新分发设置
 func UpdateScriptInfo(scriptInfo *models.ScriptInfo) bool {
 	o := orm.NewOrm()
 	res, err := o.Raw("update script_info set hospital_fk = ?,hospital_name = ?,data_type = ?,script_name = ?,description = ?,api_ip = ?,api_port = ?,status = ? where info_pk = ?", scriptInfo.HospitalFk, scriptInfo.HospitalName, scriptInfo.DataType, scriptInfo.ScriptName, scriptInfo.Description, scriptInfo.ApiIp, scriptInfo.ApiPort, scriptInfo.Status, scriptInfo.InfoPk).Exec()
@@ -106,16 +106,33 @@ func GetScriptInByPk(infoPk int) models.ScriptInfo {
 	return scriptInfo
 }
 
-// DeleteScriptInfo 根据主键删除脚本信息
+// DeleteScriptInfo 根据主键删除分发设置
 func DeleteScriptInfo(infoPk int) bool {
 	o := orm.NewOrm()
 	res, err := o.Raw("delete from script_info where info_pk = ?", infoPk).Exec()
 	if err != nil {
+		fmt.Println("DeleteScriptInfo error", err)
 		return false
 	}
-	count, _ := res.RowsAffected()
-	if count > 0 {
-		return true
+	_, err = res.RowsAffected()
+	if err != nil {
+		fmt.Println("DeleteScriptInfo error", err)
+		return false
 	}
-	return false
+	return true
+}
+
+// IfSciptInfoExist 根据文件名称查看是否已存在
+func IfSciptInfoExist(scriptName string) (bool, error) {
+	o := orm.NewOrm()
+	count := 0
+	err := o.Raw("select count(*) from script_info where script_name = ?", scriptName).QueryRow(&count)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
 }

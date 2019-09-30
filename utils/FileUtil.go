@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 // LuaFile lua文件
@@ -35,4 +36,14 @@ func GetAllLuaFile() []LuaFile {
 		fileList = append(fileList, LuaFile{fi.Name()})
 	}
 	return fileList
+}
+
+// DeleteLuaFile 删除文件
+func DeleteLuaFile(fileName string) bool {
+	err := os.Remove("luafile/" + fileName)
+	if err != nil {
+		fmt.Println("DeleteLuaFile error", err)
+		return false
+	}
+	return true
 }
