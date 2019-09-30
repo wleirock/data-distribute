@@ -21,11 +21,19 @@ func init() {
 	beego.Router("/web/script/hospitalList", &controllers.ScriptController{}, "get:GetHospitalList")
 	beego.Router("/web/script/methodlList", &controllers.ScriptController{}, "get:GetMethodList")
 
-	//脚本文件
+	// 脚本文件
 	beego.Router("/web/script/file/index", &controllers.ScriptFileController{}, "get:Index")
 	beego.Router("/web/script/file/list", &controllers.ScriptFileController{}, "post:List")
 	beego.Router("/web/script/file/upload", &controllers.ScriptFileController{}, "post:Upload")
 	beego.Router("/web/script/file/delete", &controllers.ScriptFileController{}, "post:Delete")
+	beego.Router("/web/script/file/download", &controllers.ScriptFileController{}, "get:Download")
+
+	// 公共方法
+	beego.Router("/web/method/index", &controllers.PublicMethodController{}, "get:Index")
+	beego.Router("/web/method/list", &controllers.PublicMethodController{}, "post:List")
+	beego.Router("/web/method/add", &controllers.PublicMethodController{}, "get:Add")
+	beego.Router("/web/method/save", &controllers.PublicMethodController{}, "post:Save")
+	beego.Router("/web/method/delete", &controllers.PublicMethodController{}, "post:Delete")
 
 	// API
 	beego.Router("/api/repportInfo/distribute", &controllers.ReportInfoController{}, "*:Distribute")
