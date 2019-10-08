@@ -136,3 +136,18 @@ func IfSciptInfoExist(scriptName string) (bool, error) {
 
 	return false, nil
 }
+
+// GetScriptInfoListByHosFk 根据机构ID查询
+func GetScriptInfoListByHosFk(hospitalFk int, dataType string) []models.ScriptInfo {
+	var list []models.ScriptInfo
+	if hospitalFk == 0 || dataType == "" {
+		return list
+	}
+	o := orm.NewOrm()
+	_, err := o.Raw("select * from script_info where hospital_fk = ? and data_type = ?", hospitalFk, dataType).QueryRows(&list)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return list
+}

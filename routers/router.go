@@ -1,13 +1,14 @@
 package routers
 
 import (
+	"wleirock/data-distribute/api"
 	"wleirock/data-distribute/controllers"
 
 	"github.com/astaxie/beego"
 )
 
 func init() {
-	// 账号
+	// 登录
 	beego.Router("/", &controllers.BaseController{})
 	beego.Router("/account/login", &controllers.AccountController{}, "post:Login")
 	beego.Router("/account/logout", &controllers.AccountController{}, "get:Logout")
@@ -36,7 +37,8 @@ func init() {
 	beego.Router("/web/method/delete", &controllers.PublicMethodController{}, "post:Delete")
 
 	// API
-	beego.Router("/api/repportInfo/distribute", &controllers.ReportInfoController{}, "*:Distribute")
+	beego.Router("/api/distribute/report", &api.ReportAPIController{}, "post:Report")
+	beego.Router("/api/distribute/checkInfo", &api.ReportAPIController{}, "post:CheckInfo")
 
 	// 注册过滤器
 	beego.InsertFilter("/web/*", beego.BeforeRouter, LoginFilter)

@@ -6,13 +6,6 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// ResponseEntity 定义返回的JSON字段
-type ResponseEntity struct {
-	ResultCode string
-	IsSuccess  bool
-	ResultMsg  string
-}
-
 // AjaxMsg 页面ajax返回值定义
 type AjaxMsg struct {
 	Code int    `json:"code"`
